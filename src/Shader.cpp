@@ -101,3 +101,57 @@ void	Shader::use()
 {
 	glUseProgram(this->_id);
 }
+
+void	Shader::setBool(const std::string &name, bool value)
+{
+	glUseProgram(this->_id);
+	
+	int	uniformLocation = glGetUniformLocation(this->_id, name.c_str());
+
+	glUniform1i(uniformLocation, (int)value);
+}
+
+void	Shader::setInt(const std::string &name, int value)
+{
+	glUseProgram(this->_id);
+	
+	int	uniformLocation = glGetUniformLocation(this->_id, name.c_str());
+
+	glUniform1i(uniformLocation, value);
+}
+
+void	Shader::setFloat(const std::string &name, float value)
+{
+	glUseProgram(this->_id);
+	
+	int	uniformLocation = glGetUniformLocation(this->_id, name.c_str());
+
+	glUniform1f(uniformLocation, value);
+}
+
+void	Shader::setVec2(const std::string &name, float value1, float value2)
+{
+	glUseProgram(this->_id);
+	
+	int	uniformLocation = glGetUniformLocation(this->_id, name.c_str());
+
+	glUniform2f(uniformLocation, value1, value2);
+}
+
+void	Shader::setVec3(const std::string &name, float value1, float value2, float value3)
+{
+	glUseProgram(this->_id);
+	
+	int	uniformLocation = glGetUniformLocation(this->_id, name.c_str());
+
+	glUniform3f(uniformLocation, value1, value2, value3);
+}
+
+void	Shader::setVec4(const std::string &name, float value1, float value2, float value3, float value4)
+{
+	glUseProgram(this->_id);
+	
+	int	uniformLocation = glGetUniformLocation(this->_id, name.c_str());
+
+	glUniform4f(uniformLocation, value1, value2, value3, value4);
+}

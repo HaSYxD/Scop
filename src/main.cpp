@@ -39,10 +39,10 @@ int	main()
 
 	//Creating vertex Buffer
 	float	vertices[] = {
-		 0.5f,  0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f
+		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+		-0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f
 	};
 
 	unsigned int	indices[] = {
@@ -67,23 +67,32 @@ int	main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);			//Binding "elementBufferObject" to "GL_ELEMENT_ARRAY_BUFFER"
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);//Send "indices" into "GL_ELEMENT_ARRAY_BUFFER"
 	
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	
 	glBindVertexArray(0);
 
 	Shader	shader("./assets/shaders/default-vert.glsl", "./assets/shaders/default-frag.glsl");
 	
+	float	time = 0;
+	int	hasBeenPressed = 0;
+
 	//Main loop of the Program
 	while (!glfwWindowShouldClose(window)) {	
 		//Rendering
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		shader.use();				//Choosing shaders to render with
+		
+		shader.setFloat("time", time);
+
 		glBindVertexArray(vertexArrayObject);	//Choosing vertexArrayObject to render with
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	//Draw call
 		glBindVertexArray(0);
 
-		glfwSwapBuffers(window);
 		
 		//GLFW input handling
 		glfwPollEvents();
@@ -92,9 +101,21 @@ int	main()
 			glfwSetWindowShouldClose(window, true);
 			break ;
 		}
-		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && !hasBeenPressed) {
+			std::cout << "recompiling.." << std::endl;
 			shader.recompile();
+			hasBeenPressed = 1;
+		}
+		else if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE && hasBeenPressed)
+			hasBeenPressed = 0;
+
+		glfwSwapBuffers(window);
+		time += 0.01;
 	}
-	glfwTerminate();
+
+	glDeleteVertexArrays(1, &vertexArrayObject);
+	glDeleteBuffers(1, &vertexBufferObject);
+	glDeleteBuffers(1, &elementBufferObject);
+	//glfwTerminate();
 	return (EXIT_SUCCESS);
 }
