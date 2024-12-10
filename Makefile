@@ -1,6 +1,6 @@
 NAME = scope
 OBJDIR = build
-SRC = src/main.cpp src/Shader.cpp
+SRC = src/main.cpp src/Shader.cpp src/RenderEngine.cpp
 SRCEXT = .cpp
 OBJEXT = .o
 OBJ = $(SRC:$(SRCEXT)=$(OBJEXT))

@@ -87,6 +87,8 @@ Shader::Shader(const std::string &vertPath, const std::string &fragPath)
 
 Shader::~Shader()
 {
+	std::cout << "bye bye" << std::endl;
+	glUseProgram(0);
 	glDeleteProgram(this->_id);
 }
 
@@ -100,6 +102,12 @@ void	Shader::recompile()
 void	Shader::use()
 {
 	glUseProgram(this->_id);
+}
+
+void	Shader::destroy()
+{
+	glUseProgram(0);
+	glDeleteProgram(this->_id);
 }
 
 void	Shader::setBool(const std::string &name, bool value)

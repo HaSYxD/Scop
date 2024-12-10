@@ -10,6 +10,7 @@ class	Shader
 
 		void	use();
 		void	recompile();
+		void	destroy();
 
 		void	setBool(const std::string &name, bool value);
 		void	setInt(const std::string &name, int value);
