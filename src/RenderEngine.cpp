@@ -1,5 +1,6 @@
 # include <Shader.hpp>
 # include <RenderEngine.hpp>
+# include <math.hpp>
 
 RenderEngine::RenderEngine()
 {
@@ -43,15 +44,29 @@ void	RenderEngine::run()
 {
 	//Creating vertex Buffer
 	float	vertices[] = {
-		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f
+		 0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+
+		 0.5f,  0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+		-0.5f,  0.5f, 0.5f, 1.0f, 0.0f, 0.0f
 	};
 
 	unsigned int	indices[] = {
 		0, 1, 3,
-		1, 2, 3
+		1, 2, 3,
+		
+		4, 5, 7,
+		5, 6, 7,
+
+		0, 4, 1,
+		1, 4, 5,
+
+		2, 7, 3,
+		3, 7, 6
 	};
 
 	unsigned int	vertexBufferObject = 0;
@@ -90,6 +105,13 @@ void	RenderEngine::run()
 		this->_shaders[0]->use();				//Choosing shaders to render with
 		
 		this->_shaders[0]->setFloat("time", time);				//Choosing shaders to render with
+		
+		mat4	model = identityMatrix();
+		model = scaleMatrix(model, (vec3){0.5, 0.5, 0.5});
+		model = rotationMatrix(model, (vec3){time, time, time});
+		model = translationMatrix(model, (vec3){0});
+		this->_shaders[0]->setMat4("model", model);
+
 
 		glBindVertexArray(vertexArrayObject);	//Choosing vertexArrayObject to render with
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	//Draw call

@@ -1,11 +1,12 @@
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <sstream>
+# include <iostream>
+# include <string>
+# include <fstream>
+# include <sstream>
 
-#include <Shader.hpp>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+# include <Shader.hpp>
+# include <glad/glad.h>
+# include <GLFW/glfw3.h>
+# include <math.hpp>
 
 std::string	Shader::_getShaderSource(const std::string &path)
 {
@@ -110,56 +111,60 @@ void	Shader::destroy()
 	glDeleteProgram(this->_id);
 }
 
-void	Shader::setBool(const std::string &name, bool value)
+int	Shader::_getUniformLocation(const std::string &name)
+{
+	try {
+		return (this->_uniformLocations.at(name));
+	}
+	catch (std::exception &e) {
+		std::cout << "Uniform: " << name << " can not be accessed in cach memory.\nRetrivring from shader" << std::endl;
+
+		this->_uniformLocations[name] = glGetUniformLocation(this->_id, name.c_str());
+		return (this->_uniformLocations[name]);
+	}
+}
+
+void	Shader::setBool(const std::string &name, const bool &value)
 {
 	glUseProgram(this->_id);
 	
-	int	uniformLocation = glGetUniformLocation(this->_id, name.c_str());
+	int	uniformLocation = _getUniformLocation(name);
 
 	glUniform1i(uniformLocation, (int)value);
 }
 
-void	Shader::setInt(const std::string &name, int value)
+void	Shader::setInt(const std::string &name, const int &value)
 {
 	glUseProgram(this->_id);
 	
-	int	uniformLocation = glGetUniformLocation(this->_id, name.c_str());
+	int	uniformLocation = _getUniformLocation(name);
 
 	glUniform1i(uniformLocation, value);
 }
 
-void	Shader::setFloat(const std::string &name, float value)
+void	Shader::setFloat(const std::string &name, const float &value)
 {
 	glUseProgram(this->_id);
 	
-	int	uniformLocation = glGetUniformLocation(this->_id, name.c_str());
+	int	uniformLocation = _getUniformLocation(name);
 
 	glUniform1f(uniformLocation, value);
 }
 
-void	Shader::setVec2(const std::string &name, float value1, float value2)
+void	Shader::setVec3(const std::string &name, const struct vec3 &value)
 {
 	glUseProgram(this->_id);
 	
-	int	uniformLocation = glGetUniformLocation(this->_id, name.c_str());
+	int	uniformLocation = _getUniformLocation(name);
 
-	glUniform2f(uniformLocation, value1, value2);
+	glUniform3fv(uniformLocation, 1, value.entries);
 }
 
-void	Shader::setVec3(const std::string &name, float value1, float value2, float value3)
+void	Shader::setMat4(const std::string &name, const struct mat4 &value) 
 {
 	glUseProgram(this->_id);
 	
-	int	uniformLocation = glGetUniformLocation(this->_id, name.c_str());
+	int	uniformLocation = this->_getUniformLocation(name);
 
-	glUniform3f(uniformLocation, value1, value2, value3);
-}
-
-void	Shader::setVec4(const std::string &name, float value1, float value2, float value3, float value4)
-{
-	glUseProgram(this->_id);
-	
-	int	uniformLocation = glGetUniformLocation(this->_id, name.c_str());
-
-	glUniform4f(uniformLocation, value1, value2, value3, value4);
+	glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, value.entries);
 }
