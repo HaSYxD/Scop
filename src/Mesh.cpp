@@ -1,5 +1,9 @@
 # include <Mesh.hpp>
 
-Mesh::Mesh() {}
+Mesh::Mesh()
+{
+	
+}
+
 Mesh::~Mesh() {}
 

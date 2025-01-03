@@ -9,7 +9,7 @@ class	Shader
 		Shader(const std::string &vertPath, const std::string &fragPath);
 		~Shader();
 
-		void	use();
+		void	use() const;
 		void	recompile();
 		void	destroy();
 

@@ -1,8 +1,14 @@
+# include <cmath>
+
 # include <Shader.hpp>
+# include <Object.hpp>
+# include <Material.hpp>
 # include <RenderEngine.hpp>
 # include <math.hpp>
 
-RenderEngine::RenderEngine()
+extern float	gXOffset, gYOffset;
+
+RenderEngine::RenderEngine() : _camera((vec3){0, 0, 0})
 {
 	//Initialize GLFW for OpenGL
 	glfwInit();
@@ -28,6 +34,10 @@ RenderEngine::RenderEngine()
 	}
 	//Set The size and position of the OpenGl window inside the GLFW window
 	glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glFrontFace(GL_CW);
 
 	this->_shaders.push_back(new Shader("./assets/shaders/default-vert.glsl", "./assets/shaders/default-frag.glsl"));
 }
@@ -42,81 +52,59 @@ RenderEngine::~RenderEngine()
 
 void	RenderEngine::run()
 {
-	//Creating vertex Buffer
-	float	vertices[] = {
-		 0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+	Object	* obj = Object::load("./assets/models/campfire_complete.obj");
+	// Object	* obj = Object::load("./assets/models/teapot2.obj");
+	//-MaterialGroup	mats = loadMtlFile(obj.getMtlName());
+	//-obj.setMaterial(mats);
 
-		 0.5f,  0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-		-0.5f,  0.5f, 0.5f, 1.0f, 0.0f, 0.0f
-	};
-
-	unsigned int	indices[] = {
-		0, 1, 3,
-		1, 2, 3,
-		
-		4, 5, 7,
-		5, 6, 7,
-
-		0, 4, 1,
-		1, 4, 5,
-
-		2, 7, 3,
-		3, 7, 6
-	};
-
-	unsigned int	vertexBufferObject = 0;
-	glGenBuffers(1, &vertexBufferObject);		//Generating a vertex buffer object on the GPU and getting it's ID
-	
-	unsigned int	elementBufferObject = 0;	//Generating an element buffer object on the GPU and getting it's ID
-	glGenBuffers(1, &elementBufferObject);
-
-	unsigned int	vertexArrayObject = 0;
-	glGenVertexArrays(1, &vertexArrayObject);	//Generating a vertex array object on the GPU and getting it's ID
-
-	glBindVertexArray(vertexArrayObject);						//Bind Vertex Array object to store vertex attribute calls
-	
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);				//Binding the vertex buffer object to the target "GL_ARRAY_BUFFER"
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);	//Send "vertices" into "GL_ARRAY_BUFFER" wich is bound to "vertexBufferObject"
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);			//Binding "elementBufferObject" to "GL_ELEMENT_ARRAY_BUFFER"
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);//Send "indices" into "GL_ELEMENT_ARRAY_BUFFER"
-	
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	
-	glBindVertexArray(0);
 
 	float	time = 0;
 	int	hasBeenPressed = 0;
+
+	mat4	projection = projectionMatrix(60.0f, (float)WIN_WIDTH / (float)WIN_HEIGHT, 0.1f, 1000.0f);
+	this->_shaders[0]->setMat4("projection", projection);
 
 	//Main loop of the Program
 	while (!glfwWindowShouldClose(this->_window)) {	
 		//Rendering
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		this->_shaders[0]->use();				//Choosing shaders to render with
-		
 		this->_shaders[0]->setFloat("time", time);				//Choosing shaders to render with
-		
+	
+		this->_camera.update((vec2){gXOffset, gYOffset});
+
+		// Plane model matrix
 		mat4	model = identityMatrix();
-		model = scaleMatrix(model, (vec3){0.5, 0.5, 0.5});
-		model = rotationMatrix(model, (vec3){time, time, time});
-		model = translationMatrix(model, (vec3){0});
+		model = scaleMatrix(model, (vec3){1.0, 1.0, 1.0});
+		//-model = rotationMatrix(model, (vec3){time, time, time});
+		model = translationMatrix(model, (vec3){0.0f, 0.0f, 0.0f});
 		this->_shaders[0]->setMat4("model", model);
+		
+		/*if (glfwGetKey(this->_window, GLFW_KEY_LEFT) == GLFW_PRESS)
+			a += 0.01;
+		else if (glfwGetKey(this->_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+			a -= 0.01;
 
+		if (glfwGetKey(this->_window, GLFW_KEY_UP) == GLFW_PRESS)
+			z += 0.01;
+		else if (glfwGetKey(this->_window, GLFW_KEY_DOWN) == GLFW_PRESS)
+			z -= 0.01;
+		*/
 
-		glBindVertexArray(vertexArrayObject);	//Choosing vertexArrayObject to render with
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	//Draw call
-		glBindVertexArray(0);
+		mat4	view = viewMatrix(
+				this->_camera.getPostion(),
+				this->_camera.getTarget());
+		this->_shaders[0]->setMat4("view", view);
+		
+		vec3	lPos = {sinf(time) * 4, 0.0f, 2.0f};
+		this->_shaders[0]->setVec3("lPos", lPos);
+		
+		//-glBindVertexArray(vertexArrayObject);	//Choosing vertexArrayObject to render with
+		//-glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	//Draw call
+		//-glBindVertexArray(0);
 
+		obj->render(*this->_shaders[0]);
 		//GLFW input handling
 		glfwPollEvents();
 		
@@ -135,7 +123,9 @@ void	RenderEngine::run()
 		glfwSwapBuffers(this->_window);
 		time += 0.01;
 	}
-	glDeleteVertexArrays(1, &vertexArrayObject);
-	glDeleteBuffers(1, &vertexBufferObject);
-	glDeleteBuffers(1, &elementBufferObject);
+}
+
+GLFWwindow	* RenderEngine::getWindow()
+{
+	return (this->_window);
 }

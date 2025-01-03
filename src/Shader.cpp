@@ -3,6 +3,7 @@
 # include <fstream>
 # include <sstream>
 
+# include <IOHandling.hpp>
 # include <Shader.hpp>
 # include <glad/glad.h>
 # include <GLFW/glfw3.h>
@@ -100,7 +101,7 @@ void	Shader::recompile()
 	this->_compile();	
 }
 
-void	Shader::use()
+void	Shader::use() const
 {
 	glUseProgram(this->_id);
 }
@@ -117,7 +118,8 @@ int	Shader::_getUniformLocation(const std::string &name)
 		return (this->_uniformLocations.at(name));
 	}
 	catch (std::exception &e) {
-		std::cout << "Uniform: " << name << " can not be accessed in cach memory.\nRetrivring from shader" << std::endl;
+		std::string	errorMsg = "Uniform" + name + " can not be accessed in cach memory.\nRetrivring from shader";
+			print(errorMsg, LEVEL::LOG);
 
 		this->_uniformLocations[name] = glGetUniformLocation(this->_id, name.c_str());
 		return (this->_uniformLocations[name]);
