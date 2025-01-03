@@ -6,10 +6,10 @@
 # define MIN_RADIUS		1.5
 # define MAX_RADIUS		15
 
-# define VELOCITY_FACTOR	0.1
+# define VELOCITY_FACTOR	0.15
 # define VELOCITY_FALLOFF	0.02
 # define MAX_VELOCITY		1
-# define MIN_VELOCITY		-1
+# define FRICTION_OVERRIDE	0.02
 
 class	Camera
 {

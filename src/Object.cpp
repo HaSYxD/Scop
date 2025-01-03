@@ -7,54 +7,11 @@
 # include <Material.hpp>
 # include <utils.hpp>
 
-Object::Object()
-{
-	//Creating vertex Buffer
-	float	vertices[] = {
-		 1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		-1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-	};
-
-	unsigned int	indices[] = {
-		0, 1, 3,
-		1, 2, 3,
-	};
-
-	glGenBuffers(1, &this->_VBO);		//Generating a vertex buffer object on the GPU and getting it's ID
-	
-	glGenBuffers(1, &this->_EBO);
-
-	glGenVertexArrays(1, &this->_VAO);	//Generating a vertex array object on the GPU and getting it's ID
-
-	glBindVertexArray(this->_VAO);						//Bind Vertex Array object to store vertex attribute calls
-	
-	glBindBuffer(GL_ARRAY_BUFFER, this->_VBO);				//Binding the vertex buffer object to the target "GL_ARRAY_BUFFER"
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);	//Send "vertices" into "GL_ARRAY_BUFFER" wich is bound to "vertexBufferObject"
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->_EBO);			//Binding "elementBufferObject" to "GL_ELEMENT_ARRAY_BUFFER"
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);//Send "indices" into "GL_ELEMENT_ARRAY_BUFFER"
-	
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
-	glBindVertexArray(0);
-
-
-}
-
 Object::Object(const uint32_t buff[3], const std::string names[2],
 		const std::vector<struct Mesh> meshs) : _name(names[0]), _mtlName(names[1]), _EBO(buff[0]),
 									_VBO(buff[1]), _VAO(buff[2])
 {
-	(void)meshs;
+	this->_meshs = meshs;
 }
 
 Object::~Object() {}
@@ -108,7 +65,7 @@ Object	* Object::load(const std::string &path)
 	std::string			names[2];
 	uint32_t			currentMesh = 0;
 
-	meshs[currentMesh] = (Mesh){"default name", NULL, 0, 0};
+	meshs.push_back(Mesh{"default name", NULL, 0, 0});
 
 	while (std::getline(file, line)) {
 		std::vector<std::string>	words = split(line, ' ');
@@ -128,10 +85,27 @@ Object	* Object::load(const std::string &path)
 		else if (words[0] == "f") {
 			readFace(words, v, vt, vn, vertices, indices, meshs[currentMesh]);
 		}
+		else if (words[0] == "g") {
+			uint32_t	newPos = meshs[currentMesh]._indicesStart + meshs[currentMesh]._indicesCount;
+
+			currentMesh++;
+			meshs.push_back(Mesh{"default name", NULL, newPos, 0});
+		}
+		else if (words[0] == "usemtl") {
+			if (meshs[currentMesh]._materialName == "default name") {
+				meshs[currentMesh]._materialName = words[1];
+				continue ;
+			}
+			uint32_t	newPos = meshs[currentMesh]._indicesStart + meshs[currentMesh]._indicesCount;
+
+			currentMesh++;
+			meshs.push_back(Mesh{words[1], NULL, newPos, 0});
+		}
 	}
 	file.close();
 
-	std::cout << " - " << meshs[currentMesh]._indicesCount << " triangles" << std::endl;
+	std::cout << " - " << meshs[currentMesh]._indicesCount + meshs[currentMesh]._indicesStart
+		<< " triangles" << std::endl;
 
 	// Object buffer construction
 	uint32_t		buffers[3] = {0};
@@ -165,7 +139,8 @@ void	Object::render(const class Shader &shader)
 {
 	shader.use();
 	glBindVertexArray(this->_VAO);
-	glDrawElements(GL_TRIANGLES, 18960, GL_UNSIGNED_INT, 0);
+	for (Mesh &mesh : this->_meshs)
+		glDrawElements(GL_TRIANGLES, mesh._indicesCount, GL_UNSIGNED_INT, (void *)(mesh._indicesStart * sizeof(unsigned int)));
 	glBindVertexArray(0);
 }
 

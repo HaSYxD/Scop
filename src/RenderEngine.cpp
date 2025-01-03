@@ -61,7 +61,7 @@ void	RenderEngine::run()
 	float	time = 0;
 	int	hasBeenPressed = 0;
 
-	mat4	projection = projectionMatrix(60.0f, (float)WIN_WIDTH / (float)WIN_HEIGHT, 0.1f, 1000.0f);
+	mat4	projection = projectionMatrix(90.0f, (float)WIN_WIDTH / (float)WIN_HEIGHT, 0.1f, 1000.0f);
 	this->_shaders[0]->setMat4("projection", projection);
 
 	//Main loop of the Program
@@ -97,7 +97,7 @@ void	RenderEngine::run()
 				this->_camera.getTarget());
 		this->_shaders[0]->setMat4("view", view);
 		
-		vec3	lPos = {sinf(time) * 4, 0.0f, 2.0f};
+		vec3	lPos = {sinf(time) * 10, cosf(time) * 10, -2.0f};
 		this->_shaders[0]->setVec3("lPos", lPos);
 		
 		//-glBindVertexArray(vertexArrayObject);	//Choosing vertexArrayObject to render with

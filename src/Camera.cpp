@@ -15,10 +15,14 @@ void	Camera::update(const vec2 &scrollOff)
 
 	float	vDelta = this->_velocity += scrollOff.entries[0] * VELOCITY_FACTOR;
 
-	if (vDelta > MAX_VELOCITY)		this->_velocity = MAX_VELOCITY;
-	else if (vDelta < MIN_VELOCITY)		this->_velocity = MIN_VELOCITY;
-	else if (vDelta < 0.1 && vDelta > -0.1)	this->_velocity = 0;
-	else					this->_velocity = vDelta;
+	if (vDelta > MAX_VELOCITY)
+		this->_velocity = MAX_VELOCITY;
+	else if (vDelta < -MAX_VELOCITY)
+		this->_velocity = -MAX_VELOCITY;
+	else if (vDelta < FRICTION_OVERRIDE && vDelta > -FRICTION_OVERRIDE)
+		this->_velocity = 0;
+	else
+		this->_velocity = vDelta;
 
 	this->_angle += this->_velocity;
 

@@ -1,3 +1,5 @@
 *.o
 compile_commands.json
 scope
+.cache
+.vim
