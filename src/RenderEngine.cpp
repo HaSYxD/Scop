@@ -50,10 +50,6 @@ RenderEngine::~RenderEngine()
 	glfwTerminate();
 }
 
-// random comment to commit updates
-// another random comment to commit updates
-// maybe the last comment
-
 void	RenderEngine::run()
 {
 	Object	* obj = Object::load("./assets/models/campfire_complete.obj");
