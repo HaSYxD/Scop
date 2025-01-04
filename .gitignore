@@ -2,4 +2,4 @@
 compile_commands.json
 scope
 .cache
-.vim
+.session.vim
