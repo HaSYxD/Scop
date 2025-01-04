@@ -4,7 +4,7 @@
 
 # define SCROLL_SENSITIVITY	0.2
 # define MIN_RADIUS		1.5
-# define MAX_RADIUS		15
+# define MAX_RADIUS		150
 
 # define VELOCITY_FACTOR	0.15
 # define VELOCITY_FALLOFF	0.02

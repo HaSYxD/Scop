@@ -7,15 +7,8 @@
 # include <Material.hpp>
 # include <utils.hpp>
 
-Object::Object(const uint32_t buff[3], const std::string names[2],
-		const std::vector<struct Mesh> meshs) : _name(names[0]), _mtlName(names[1]), _EBO(buff[0]),
-									_VBO(buff[1]), _VAO(buff[2])
-{
-	this->_meshs = meshs;
-}
-
+Object::Object() {}
 Object::~Object() {}
-
 
 Object	* Object::load(const std::string &path)
 {
@@ -60,65 +53,59 @@ Object	* Object::load(const std::string &path)
 	file.seekg(0);
 
 	// actual usage a the obj data
-	std::vector<uint32_t>		indices;
-	std::vector<struct Mesh>	meshs;
-	std::string			names[2];
-	uint32_t			currentMesh = 0;
+	std::vector<uint32_t>	indices;
+	uint32_t		currentMesh = 0;
+	Object			*obj = new Object();
 
-	meshs.push_back(Mesh{"default name", NULL, 0, 0});
+	obj->_meshs.push_back(Mesh{"default name", NULL, 0, 0});
 
 	while (std::getline(file, line)) {
 		std::vector<std::string>	words = split(line, ' ');
 
-		if (words.size() == 0) {
+		if (words.size() == 0)
 			continue ;
-		}
-		else if (words[0] == "v") {
+		else if (words[0] == "v")
 			v.push_back(readToVec3(words));
-		}
-		else if (words[0] == "vt") {
+		else if (words[0] == "vt")
 			vt.push_back(readToVec2(words));
-		}
-		else if (words[0] == "vn") {
+		else if (words[0] == "vn")
 			vn.push_back(readToVec3(words));
-		}
-		else if (words[0] == "f") {
-			readFace(words, v, vt, vn, vertices, indices, meshs[currentMesh]);
-		}
+		else if (words[0] == "f")
+			readFace(words, v, vt, vn, vertices, indices, obj->_meshs[currentMesh]);
+		else if (words[0] == "mtllib")
+			obj->_mtlName = words[1];
 		else if (words[0] == "g") {
-			uint32_t	newPos = meshs[currentMesh]._indicesStart + meshs[currentMesh]._indicesCount;
+			uint32_t	newPos = obj->_meshs[currentMesh]._indicesStart + obj->_meshs[currentMesh]._indicesCount;
 
 			currentMesh++;
-			meshs.push_back(Mesh{"default name", NULL, newPos, 0});
+			obj->_meshs.push_back(Mesh{"default name", NULL, newPos, 0});
 		}
 		else if (words[0] == "usemtl") {
-			if (meshs[currentMesh]._materialName == "default name") {
-				meshs[currentMesh]._materialName = words[1];
+			if (obj->_meshs[currentMesh]._materialName == "default name") {
+				obj->_meshs[currentMesh]._materialName = words[1];
 				continue ;
 			}
-			uint32_t	newPos = meshs[currentMesh]._indicesStart + meshs[currentMesh]._indicesCount;
+			uint32_t	newPos = obj->_meshs[currentMesh]._indicesStart + obj->_meshs[currentMesh]._indicesCount;
 
 			currentMesh++;
-			meshs.push_back(Mesh{words[1], NULL, newPos, 0});
+			obj->_meshs.push_back(Mesh{words[1], NULL, newPos, 0});
 		}
 	}
 	file.close();
 
-	std::cout << " - " << meshs[currentMesh]._indicesCount + meshs[currentMesh]._indicesStart
+	std::cout << " - " << obj->_meshs[currentMesh]._indicesCount + obj->_meshs[currentMesh]._indicesStart
 		<< " triangles" << std::endl;
 
 	// Object buffer construction
-	uint32_t		buffers[3] = {0};
+	glGenVertexArrays(1, &obj->_VAO);
+	glBindVertexArray(obj->_VAO);
 
-	glGenVertexArrays(1, &buffers[2]);
-	glBindVertexArray(buffers[2]);
-
-	glGenBuffers(1, &buffers[1]);
-	glBindBuffer(GL_ARRAY_BUFFER, buffers[1]);
+	glGenBuffers(1, &obj->_VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, obj->_VBO);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-	glGenBuffers(1, &buffers[0]);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[0]);
+	glGenBuffers(1, &obj->_EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, obj->_EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), indices.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
@@ -132,42 +119,35 @@ Object	* Object::load(const std::string &path)
 	
 	glBindVertexArray(0);
 
-	return (new Object(buffers, names, meshs));
+	return (obj);
 }
 
-void	Object::render(const class Shader &shader)
+void	Object::render(class Shader &shader)
 {
 	shader.use();
 	glBindVertexArray(this->_VAO);
-	for (Mesh &mesh : this->_meshs)
+	for (Mesh &mesh : this->_meshs) {
+		shader.setVec3("ambColor", mesh._materialPtr->getAmbColor());
+		shader.setVec3("diffColor", mesh._materialPtr->getDiffColor());
+		shader.setVec3("specColor", mesh._materialPtr->getSpecColor());
+		shader.setFloat("specExponent", mesh._materialPtr->getSpecExponent());
+
 		glDrawElements(GL_TRIANGLES, mesh._indicesCount, GL_UNSIGNED_INT, (void *)(mesh._indicesStart * sizeof(unsigned int)));
+	}
 	glBindVertexArray(0);
 }
 
-//-void	Object::setMaterial(const struct MaterialGroup &mats)
-//-{
-	//-for (Mesh msh : this->_meshs)
-		//-for (Material mat : mats._materials)
-			//-if (msh._materialName == mat.getName())
-				//-msh._materialPtr = &mat;
-//-}
+void	Object::setMaterial(struct MaterialGroup *mats)
+{
+	for (Mesh &msh : this->_meshs)
+		for (Material &mat : mats->_materials)
+			if (msh._materialName == mat.getName())
+				msh._materialPtr = &mat;
+}
 
 const std::string	& Object::getMtlName() const
 {
 	return (this->_mtlName);
-}
-
-vec3	readToVec3(const std::vector<std::string> &words)
-{
-	return ((vec3){(float)atof(words[1].c_str()),
-			(float)atof(words[2].c_str()),
-			(float)atof(words[3].c_str())});
-}
-
-vec2	readToVec2(const std::vector<std::string> &words)
-{
-	return ((vec2){(float)atof(words[1].c_str()),
-			(float)atof(words[2].c_str())});
 }
 
 void	readFace(const std::vector<std::string> &words, const std::vector<vec3> &v, const std::vector<vec2> &vt,
@@ -220,9 +200,9 @@ void	readCorner(const std::string &description, const std::vector<vec3> &v, cons
 	
 	// Normals (vec3)
 	if (spDesc.size() <= 2 || spDesc[2].empty()) {
-		vertices.push_back(0);
-		vertices.push_back(0);
-		vertices.push_back(0);
+		vertices.push_back(1);
+		vertices.push_back(1);
+		vertices.push_back(1);
 	}
 	else {
 		size_t	vnIndex = atol(spDesc[2].c_str()) - 1;

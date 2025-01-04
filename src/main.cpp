@@ -15,14 +15,16 @@ void	handleMouseScroll(GLFWwindow *window, double xOff, double yOff)
 	gYOffset = (float)yOff;
 }
 
-int	main()
+int	main(int argc, char **argv)
 {
+	if (argc != 2) return (EXIT_FAILURE);
+
 	try
 	{
 		RenderEngine	re = RenderEngine();
 
 		glfwSetScrollCallback(re.getWindow(), &handleMouseScroll);
-		re.run();
+		re.run(argv[1]);
 	}
 	catch (std::exception &e)
 	{

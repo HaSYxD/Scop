@@ -9,19 +9,22 @@ out vec4	FragColor;
 uniform float	time;
 uniform vec3	lPos;
 
+uniform vec3	ambColor;
+uniform vec3	diffColor;
+uniform vec3	specColor;
+uniform float	specExponent;
+
 void	main()
 {
-	vec3	lColor = vec3(1.0, 1.0, 1.0);
-	vec3	objColor = vec3(1.0, 0.0f, 0.0f);
 
 	float	ambiantStrength = 0.1;
-	vec3	ambiant = ambiantStrength * lColor;
+	vec3	ambiant = ambiantStrength * ambColor;
 
 	vec3	lDir = normalize(lPos - FragPos);
 
 	float	diff = max(dot(Norm, lDir), 0.0);
-	vec3	diffuse = diff * lColor;
+	vec3	diffuse = diff * diffColor;
 
-	FragColor = vec4((ambiant + diffuse) * objColor, 1.0f);
+	FragColor = vec4((ambiant + diffuse), 1.0f);
 	//-FragColor = vec4(Norm, 1.0f);
 }

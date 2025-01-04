@@ -16,3 +16,26 @@ std::vector<std::string>	split(const std::string &str, const char &c)
 	}
 	return (words);
 }
+
+vec3	readToVec3(const std::vector<std::string> &words)
+{
+	return ((vec3){(float)atof(words[1].c_str()),
+			(float)atof(words[2].c_str()),
+			(float)atof(words[3].c_str())});
+}
+
+vec2	readToVec2(const std::vector<std::string> &words)
+{
+	return ((vec2){(float)atof(words[1].c_str()),
+			(float)atof(words[2].c_str())});
+}
+
+std::string	join(const std::vector<std::string> &words, const std::string &del, const size_t &n)
+{
+	std::string	str = "";
+	for (size_t i = 0; i < n; i++) {
+		str +=words[i];
+		str +=del;
+	}
+	return (str);
+}

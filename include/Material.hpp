@@ -15,27 +15,27 @@ typedef struct	MaterialGroup
 class	Material
 {
 	public:
-		Material();
 		~Material();
-		
-		std::string	& getName() const;
 
-		uintptr_t	& getTexture() const;
+		static MaterialGroup	* loadMtlFile(const std::string &path);
 		
-		vec3	& getAmbColor() const;
-		vec3	& getDiffColor() const;
-		vec3	& getSpecColor() const;
-		float	& getSpecExponent() const;
+		std::string	& getName();
+		uintptr_t	& getTexture();
+		
+		vec3	& getAmbColor();
+		vec3	& getDiffColor();
+		vec3	& getSpecColor();
+		float	& getSpecExponent();
 
 	private:
-		std::string	_name;
+		Material(const std::string &name);
 
+		std::string	_name;
 		uintptr_t	_texture;
 
 		vec3	_ambColor;
 		vec3	_diffColor;
-		vec3	_SpecColor;
+		vec3	_specColor;
 		float	_specExponent;
 };
 
-MaterialGroup	loadMtlFile(const std::string &path);

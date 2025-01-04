@@ -5,6 +5,7 @@
 # include <Material.hpp>
 # include <RenderEngine.hpp>
 # include <math.hpp>
+# include <utils.hpp>
 
 extern float	gXOffset, gYOffset;
 
@@ -50,14 +51,15 @@ RenderEngine::~RenderEngine()
 	glfwTerminate();
 }
 
-void	RenderEngine::run()
+void	RenderEngine::run(const std::string &path)
 {
-	Object	* obj = Object::load("./assets/models/campfire_complete.obj");
-	// Object	* obj = Object::load("./assets/models/teapot2.obj");
-	//-MaterialGroup	mats = loadMtlFile(obj.getMtlName());
-	//-obj.setMaterial(mats);
+	Object	* obj = Object::load(path);
 
+	std::vector<std::string>	spStr = split(path, '/');
 
+	MaterialGroup	* mats = Material::loadMtlFile(join(spStr, "/", spStr.size() - 1) + obj->getMtlName());
+	obj->setMaterial(mats);
+	
 	float	time = 0;
 	int	hasBeenPressed = 0;
 
@@ -77,7 +79,7 @@ void	RenderEngine::run()
 		// Plane model matrix
 		mat4	model = identityMatrix();
 		model = scaleMatrix(model, (vec3){1.0, 1.0, 1.0});
-		//-model = rotationMatrix(model, (vec3){time, time, time});
+		model = rotationMatrix(model, (vec3){0, 0, 0});
 		model = translationMatrix(model, (vec3){0.0f, 0.0f, 0.0f});
 		this->_shaders[0]->setMat4("model", model);
 		
@@ -97,7 +99,7 @@ void	RenderEngine::run()
 				this->_camera.getTarget());
 		this->_shaders[0]->setMat4("view", view);
 		
-		vec3	lPos = {sinf(time) * 10, cosf(time) * 10, -2.0f};
+		vec3	lPos = {sinf(time * 0.1) * 100, cosf(time * 0.1) * 100, -100.0f};
 		this->_shaders[0]->setVec3("lPos", lPos);
 		
 		//-glBindVertexArray(vertexArrayObject);	//Choosing vertexArrayObject to render with

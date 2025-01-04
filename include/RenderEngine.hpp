@@ -3,6 +3,7 @@
 # include <vector>
 # include <glad/glad.h>
 # include <GLFW/glfw3.h>
+# include <string>
 
 # include <Camera.hpp>
 
@@ -15,7 +16,7 @@ class	RenderEngine
 		RenderEngine();
 		~RenderEngine();
 
-		void	run();
+		void	run(const std::string &path);
 
 		GLFWwindow	* getWindow();
 	
