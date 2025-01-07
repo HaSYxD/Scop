@@ -39,7 +39,7 @@ Image	* Image::load(const std::string &path)
 			|| (maxColValue < 0 || maxColValue > 255))
 		throw (std::runtime_error("invalid or corrupted file"));
 	
-	if (width > 1024 || height > 1024)
+	if (width > 4096 || height > 4096)
 		throw (std::runtime_error("image is to large"));
 
 	Image	*img = new Image();

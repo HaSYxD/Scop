@@ -44,7 +44,7 @@ Object	* Object::load(const std::string &path)
 	vt.reserve(texNum);
 	vn.reserve(normNum);
 
-	std::cout << "Loading:\n - " << posNum << " vertex\n - " << texNum << " tex pos\n - " << normNum << " normals" << std::endl;
+	std::cout << "Loading:\n - " << posNum << " vertex\n - " << texNum << " uv\'s\n - " << normNum << " normals" << std::endl;
 
 	// reserver for each triangles: 3 corner composed of a 3 position floats, 2 texture floats and 3 normal floats
 	vertices.reserve(faceNum * 3 * (3 + 2 + 3 + 1)); 
@@ -122,7 +122,7 @@ Object	* Object::load(const std::string &path)
 		(centerMax.entries[2] + centerMin.entries[2]) / 2
 	};
 
-	std::cout << obj->_center.entries[0] << " " << obj->_center.entries[1] << " " << obj->_center.entries[2] << std::endl;
+	//-std::cout << obj->_center.entries[0] << " " << obj->_center.entries[1] << " " << obj->_center.entries[2] << std::endl;
 
 	std::cout << " - " << obj->_meshs[currentMesh]._indicesCount + obj->_meshs[currentMesh]._indicesStart
 		<< " triangles" << std::endl;
