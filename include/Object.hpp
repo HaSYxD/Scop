@@ -26,12 +26,16 @@ class	Object
 
 		void	setMaterial(struct MaterialGroup *mats);
 
+		const vec3	& getCenter() const;
+
 	private:
 		Object();
 		
 		std::vector<struct Mesh>	_meshs;
 		
 		std::string	_mtlName;
+
+		vec3	_center;
 		
 		unsigned int	_EBO;
 		unsigned int	_VBO;

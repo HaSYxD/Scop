@@ -1,7 +1,7 @@
 # include <Camera.hpp>
 # include <cmath>
 
-Camera::Camera(const vec3 target) : _position((vec3){0, 0, -2}), _target(target), _angle(0), _velocity(0), _radius(5) {}
+Camera::Camera(const vec3 target) : _position((vec3){0, 0, 1}), _target(target), _angle(0), _velocity(0), _radius(5) {}
 
 Camera::~Camera() {}
 

@@ -7,8 +7,9 @@
 
 # include <Camera.hpp>
 
-#define WIN_WIDTH	1600
-#define WIN_HEIGHT	900
+# define WIN_WIDTH	1600
+# define WIN_HEIGHT	900
+# define MIN_SCALE	0.1
 
 class	RenderEngine
 {

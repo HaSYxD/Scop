@@ -1,18 +1,10 @@
 # include <fstream>
-# include <sstream>
-# include <iostream>
 # include <cstdlib>
 # include <string>
 
 # include <Image.hpp>
 
-Image::Image(const int &width, const int &height, const uint8_t *imgData)
-{
-	(void)width;
-	(void)height;
-	(void)imgData;
-}
-
+Image::Image() : _width(0), _height(0), _data(NULL) {}
 Image::~Image() {}
 
 Image	Image::load(const std::string &path)
@@ -50,11 +42,15 @@ Image	Image::load(const std::string &path)
 	if (width > 1024 || height > 1024)
 		throw (std::runtime_error("image is to large"));
 
-	char	* imgData = new char[width * height];
+	Image	img = Image();
 
-	file.read(imgData, width * height);
+	img._width = width;
+	img._height = height;
+
+	img._data = new uint8_t[width * height];
+	file.read((char *)img._data, width * height);
 	file.close();
-	return (Image(width, height, (uint8_t *)imgData));
+	return (img);
 }
 		
 unsigned int	& Image::getWidth()

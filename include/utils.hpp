@@ -7,6 +7,7 @@
 
 std::vector<std::string>	split(const std::string &str, const char &c);
 std::string			join(const std::vector<std::string> &words, const std::string &del, const size_t &n);
+std::string			trim(const std::string &str, const char &c);
 
 vec3	readToVec3(const std::vector<std::string> &words);
 vec2	readToVec2(const std::vector<std::string> &words);

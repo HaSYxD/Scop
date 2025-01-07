@@ -1,13 +1,14 @@
 # include <fstream>
 # include <glad/glad.h>
 # include <GLFW/glfw3.h>
+# include <cfloat>
 
 # include <Object.hpp>
 # include <Shader.hpp>
 # include <Material.hpp>
 # include <utils.hpp>
 
-Object::Object() {}
+Object::Object() : _center(vec3{0, 0, 0}), _EBO(0), _VBO(0), _VAO(0) {}
 Object::~Object() {}
 
 Object	* Object::load(const std::string &path)
@@ -59,13 +60,33 @@ Object	* Object::load(const std::string &path)
 
 	obj->_meshs.push_back(Mesh{"default name", NULL, 0, 0});
 
+	vec3	centerMin = vec3{FLT_MAX, FLT_MAX, FLT_MAX};
+	vec3	centerMax = vec3{FLT_MIN, FLT_MIN, FLT_MIN};
+	size_t	i = 0;
+
 	while (std::getline(file, line)) {
 		std::vector<std::string>	words = split(line, ' ');
 
 		if (words.size() == 0)
 			continue ;
-		else if (words[0] == "v")
+		else if (words[0] == "v") {
 			v.push_back(readToVec3(words));
+
+			if (v[i].entries[0] < centerMin.entries[0])
+				centerMin.entries[0] = v[i].entries[0];
+			if (v[i].entries[1] < centerMin.entries[1])
+				centerMin.entries[1] = v[i].entries[1];
+			if (v[i].entries[2] < centerMin.entries[2])
+				centerMin.entries[2] = v[i].entries[2];
+			
+			if (v[i].entries[0] > centerMax.entries[0])
+				centerMax.entries[0] = v[i].entries[0];
+			if (v[i].entries[1] > centerMax.entries[1])
+				centerMax.entries[1] = v[i].entries[1];
+			if (v[i].entries[2] > centerMax.entries[2])
+				centerMax.entries[2] = v[i].entries[2];
+			i++;
+		}
 		else if (words[0] == "vt")
 			vt.push_back(readToVec2(words));
 		else if (words[0] == "vn")
@@ -92,6 +113,14 @@ Object	* Object::load(const std::string &path)
 		}
 	}
 	file.close();
+
+	obj->_center = vec3{
+		(centerMax.entries[0] + centerMin.entries[0]) / 2,
+		(centerMax.entries[1] + centerMin.entries[1]) / 2,
+		(centerMax.entries[2] + centerMin.entries[2]) / 2
+	};
+
+	std::cout << obj->_center.entries[0] << " " << obj->_center.entries[1] << " " << obj->_center.entries[2] << std::endl;
 
 	std::cout << " - " << obj->_meshs[currentMesh]._indicesCount + obj->_meshs[currentMesh]._indicesStart
 		<< " triangles" << std::endl;
@@ -211,4 +240,9 @@ void	readCorner(const std::string &description, const std::vector<vec3> &v, cons
 		vertices.push_back(vn[vnIndex].entries[1]);
 		vertices.push_back(vn[vnIndex].entries[2]);
 	}
+}
+
+const vec3	& Object::getCenter() const
+{
+	return (this->_center);
 }

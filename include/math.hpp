@@ -21,17 +21,17 @@ mat4	identityMatrix();
 
 // Scale the given matrix by multiplying it with the given factor.
 // Should be done first in the case of the creation of a model transform.
-mat4	scaleMatrix(mat4 matrix, const vec3 &factors);
+mat4	scaleMatrix(const vec3 &factors);
 
 // Rotate the given matrix by multiplying it with the given angles.
 // Should be done after the scaling and before the translation in the case of the creation of a model transform.
-mat4	rotationMatrix(mat4 matrix, const vec3 &angles);
+mat4	rotationMatrix(const vec3 &angles);
 
 // Translate the given matrix by multipying it by the factors.
-mat4	translationMatrix(mat4 matrix, const vec3 &factors);
+mat4	translationMatrix(const vec3 &factors);
 
 // Multiply the first given matrix by the second given matrix.
-mat4	matrixMultiply(mat4 &matrix1, mat4 &matrix2);
+mat4	matrixMultiply(const mat4 &matrix1, const mat4 &matrix2);
 
 // Create a view transform from a camera position vector and a looking point vector.
 mat4	viewMatrix(const vec3 from, const vec3 to);

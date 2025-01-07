@@ -50,7 +50,7 @@ void	printMatrix(mat4 &matrix)
 	std::cout << "| "<< matrix.entries[3] << ", " << matrix.entries[7] << ", " << matrix.entries[11] << ", " << matrix.entries[15] << " |\n" << std::endl;
 }
 
-static vec4	vec4FromMat4Row(mat4 &matrix, unsigned int row)
+static vec4	vec4FromMat4Row(const mat4 &matrix, unsigned int row)
 {
 	vec4	newVector = {0};
 
@@ -64,7 +64,7 @@ static vec4	vec4FromMat4Row(mat4 &matrix, unsigned int row)
 	return (newVector);
 }
 
-static vec4	vec4FromMat4collumn(mat4 &matrix, unsigned int collumn)
+static vec4	vec4FromMat4collumn(const mat4 &matrix, unsigned int collumn)
 {
 	vec4	newVector = {0};
 
@@ -91,7 +91,7 @@ mat4	identityMatrix()
 	return (matrix);
 }
 
-mat4	scaleMatrix(mat4 matrix, const vec3 &scaleFactor)
+mat4	scaleMatrix(const vec3 &scaleFactor)
 {
 	mat4	scaleMatrix = {
 		scaleFactor.entries[0], 0, 0, 0,
@@ -99,13 +99,11 @@ mat4	scaleMatrix(mat4 matrix, const vec3 &scaleFactor)
 		0, 0, scaleFactor.entries[2], 0,
 		0, 0, 0, 1
 	};
-	
-	matrix = matrixMultiply(matrix, scaleMatrix);
-	// printMatrix(matrix);
-	return (matrix);
+
+	return (scaleMatrix);
 }
 
-mat4	rotationMatrix(mat4 matrix, const vec3 &angles)
+mat4	rotationMatrix(const vec3 &angles)
 {
 	float	x = angles.entries[0];
 	float	y = angles.entries[1];
@@ -130,20 +128,23 @@ mat4	rotationMatrix(mat4 matrix, const vec3 &angles)
 		       0,	0, 0, 1
 	};
 
-	matrix = matrixMultiply(matrix, xRotationMatrix);
-	matrix = matrixMultiply(matrix, yRotationMatrix);
-	matrix = matrixMultiply(matrix, zRotationMatrix);
+	mat4	newMatrix = identityMatrix();
+
+	newMatrix = matrixMultiply(newMatrix, xRotationMatrix);
+	newMatrix = matrixMultiply(newMatrix, yRotationMatrix);
+	newMatrix = matrixMultiply(newMatrix, zRotationMatrix);
 	// printMatrix(matrix);
-	return (matrix);
+	return (newMatrix);
 }
 
-mat4	translationMatrix(mat4 matrix, const vec3 &factors)
+mat4	translationMatrix(const vec3 &factors)
 {
-	matrix.entries[12] = factors.entries[0];
-	matrix.entries[13] = factors.entries[1];
-	matrix.entries[14] = factors.entries[2];
-	// printMatrix(matrix);
-	return (matrix);
+	mat4	newMatrix = identityMatrix();	
+
+	newMatrix.entries[12] = factors.entries[0];
+	newMatrix.entries[13] = factors.entries[1];
+	newMatrix.entries[14] = factors.entries[2];
+	return (newMatrix);
 }
 
 mat4	viewMatrix(const vec3 from, const vec3 to)
@@ -167,9 +168,9 @@ mat4	viewMatrix(const vec3 from, const vec3 to)
 	};
 }
 
-mat4	matrixMultiply(mat4 &matrix1, mat4 &matrix2)
+mat4	matrixMultiply(const mat4 &matrix1, const mat4 &matrix2)
 {
-	mat4	newMatrix = {0};
+	mat4	newMatrix = identityMatrix();
 	int	k = 0;
 
 	for (int i = 0; i < 4; i++)

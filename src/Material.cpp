@@ -1,14 +1,15 @@
 # include <utils.hpp>
 # include <Material.hpp>
+# include <Image.hpp>
 
 # include <fstream>
 # include <iostream>
 
 Material::Material(const std::string &name) : _name(name)
 {
-	this->_ambColor = vec3{0, 0, 0};
-	this->_diffColor = vec3{0, 0, 0};
-	this->_specColor = vec3{0, 0, 0};
+	this->_ambColor = vec3{1, 1, 1};
+	this->_diffColor = vec3{1, 1, 1};
+	this->_specColor = vec3{1, 1, 1};
 	this->_specExponent = 0;
 }
 
@@ -56,6 +57,9 @@ MaterialGroup	* Material::loadMtlFile(const std::string &path)
 			mtlg->_materials[currMat]._specColor = readToVec3(spStr);
 		else if (spStr[0] == "Ns")
 			mtlg->_materials[currMat]._specExponent = atof(spStr[1].c_str());
+		else if (spStr[0] == "map_Ka" || spStr[0] == "map_Kd" || spStr[0] == "map_Ks"){
+			Image	img = Image::load(trim(path, '/') + spStr[1]);
+		}
 	}
 
 	for (Material &mat : mtlg->_materials) {
