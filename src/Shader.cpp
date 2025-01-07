@@ -114,16 +114,7 @@ void	Shader::destroy()
 
 int	Shader::_getUniformLocation(const std::string &name)
 {
-	try {
-		return (this->_uniformLocations.at(name));
-	}
-	catch (std::exception &e) {
-		std::string	errorMsg = "Uniform" + name + " can not be accessed in cach memory.\nRetrivring from shader";
-			print(errorMsg, LEVEL::LOG);
-
-		this->_uniformLocations[name] = glGetUniformLocation(this->_id, name.c_str());
-		return (this->_uniformLocations[name]);
-	}
+	return (glGetUniformLocation(this->_id, name.c_str()));
 }
 
 void	Shader::setBool(const std::string &name, const bool &value)

@@ -9,9 +9,9 @@ void	Camera::update(const vec2 &scrollOff)
 {
 	float	rDelta = this->_radius += scrollOff.entries[1] * SCROLL_SENSITIVITY;
 
-	if (rDelta > MAX_RADIUS)	this->_radius = MAX_RADIUS;
-	else if (rDelta < MIN_RADIUS)	this->_radius = MIN_RADIUS;
-	else				this->_radius = rDelta;
+	if (rDelta > MAX_RADIUS)      this->_radius = MAX_RADIUS;
+	else if (rDelta < MIN_RADIUS) this->_radius = MIN_RADIUS;
+	else			      this->_radius = rDelta;
 
 	float	vDelta = this->_velocity += scrollOff.entries[0] * VELOCITY_FACTOR;
 
@@ -27,12 +27,12 @@ void	Camera::update(const vec2 &scrollOff)
 	this->_angle += this->_velocity;
 
 	this->_position = {
-		this->_radius * sinf(this->_angle),
-		this->_radius * cosf(this->_angle),
+		this->_radius * sinf(this->_angle) + this->_target.entries[0],
+		this->_radius * cosf(this->_angle) + this->_target.entries[1],
 		this->_position.entries[2]
 	};
-	if (this->_velocity > 0)	this->_velocity -= VELOCITY_FALLOFF;
-	else				this->_velocity += VELOCITY_FALLOFF;
+	if (this->_velocity > 0) this->_velocity -= VELOCITY_FALLOFF;
+	else			 this->_velocity += VELOCITY_FALLOFF;
 }
 
 void	Camera::setPosition(const vec3 &position)

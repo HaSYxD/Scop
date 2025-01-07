@@ -133,7 +133,6 @@ mat4	rotationMatrix(const vec3 &angles)
 	newMatrix = matrixMultiply(newMatrix, xRotationMatrix);
 	newMatrix = matrixMultiply(newMatrix, yRotationMatrix);
 	newMatrix = matrixMultiply(newMatrix, zRotationMatrix);
-	// printMatrix(matrix);
 	return (newMatrix);
 }
 

@@ -8,7 +8,7 @@ class Image
 	public:
 		~Image();
 
-		static Image	load(const std::string &path);
+		static Image	* load(const std::string &path);
 		unsigned int	& getWidth();
 		unsigned int	& getHeight();
 		uint8_t		* getData();

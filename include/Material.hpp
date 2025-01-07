@@ -20,7 +20,7 @@ class	Material
 		static MaterialGroup	* loadMtlFile(const std::string &path);
 		
 		std::string	& getName();
-		uintptr_t	& getTexture();
+		uint32_t	& getTexture();
 		
 		vec3	& getAmbColor();
 		vec3	& getDiffColor();
@@ -31,11 +31,11 @@ class	Material
 		Material(const std::string &name);
 
 		std::string	_name;
-		uintptr_t	_texture;
 
 		vec3	_ambColor;
 		vec3	_diffColor;
 		vec3	_specColor;
 		float	_specExponent;
+		uint32_t	_texture;
 };
 

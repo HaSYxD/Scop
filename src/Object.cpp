@@ -47,7 +47,7 @@ Object	* Object::load(const std::string &path)
 	std::cout << "Loading:\n - " << posNum << " vertex\n - " << texNum << " tex pos\n - " << normNum << " normals" << std::endl;
 
 	// reserver for each triangles: 3 corner composed of a 3 position floats, 2 texture floats and 3 normal floats
-	vertices.reserve(faceNum * 3 * (3 + 2 + 3)); 
+	vertices.reserve(faceNum * 3 * (3 + 2 + 3 + 1)); 
 
 	// go back to the start of the file
 	file.clear();
@@ -93,9 +93,11 @@ Object	* Object::load(const std::string &path)
 			vn.push_back(readToVec3(words));
 		else if (words[0] == "f")
 			readFace(words, v, vt, vn, vertices, indices, obj->_meshs[currentMesh]);
-		else if (words[0] == "mtllib")
+		else if (words[0] == "mtllib") {
 			obj->_mtlName = words[1];
+		}
 		else if (words[0] == "g") {
+			if (obj->_meshs[currentMesh]._materialName == "default name") continue ;
 			uint32_t	newPos = obj->_meshs[currentMesh]._indicesStart + obj->_meshs[currentMesh]._indicesCount;
 
 			currentMesh++;
@@ -137,14 +139,16 @@ Object	* Object::load(const std::string &path)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, obj->_EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), indices.data(), GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(5 * sizeof(float)));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(5 * sizeof(float)));
 	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(8 * sizeof(float)));
+	glEnableVertexAttribArray(3);
 	
 	glBindVertexArray(0);
 
@@ -160,6 +164,11 @@ void	Object::render(class Shader &shader)
 		shader.setVec3("diffColor", mesh._materialPtr->getDiffColor());
 		shader.setVec3("specColor", mesh._materialPtr->getSpecColor());
 		shader.setFloat("specExponent", mesh._materialPtr->getSpecExponent());
+
+		if (!mesh._materialPtr->getTexture())
+			shader.setInt("texMissing", 1);
+		else 
+			shader.setInt("texMissing", 0);
 
 		glDrawElements(GL_TRIANGLES, mesh._indicesCount, GL_UNSIGNED_INT, (void *)(mesh._indicesStart * sizeof(unsigned int)));
 	}
@@ -186,8 +195,11 @@ void	readFace(const std::vector<std::string> &words, const std::vector<vec3> &v,
 
 	for (size_t i = 0; i < triangleCount; i++) {
 		readCorner(words[1], v, vt, vn, vertices);
+		vertices.push_back(mesh._indicesStart + mesh._indicesCount);
 		readCorner(words[2 + i], v, vt, vn, vertices);
+		vertices.push_back(mesh._indicesStart + mesh._indicesCount);
 		readCorner(words[3 + i], v, vt, vn, vertices);
+		vertices.push_back(mesh._indicesStart + mesh._indicesCount);
 
 		indices.push_back(mesh._indicesStart + mesh._indicesCount);
 		indices.push_back(mesh._indicesStart + mesh._indicesCount + 1);

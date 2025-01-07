@@ -7,7 +7,7 @@
 Image::Image() : _width(0), _height(0), _data(NULL) {}
 Image::~Image() {}
 
-Image	Image::load(const std::string &path)
+Image	* Image::load(const std::string &path)
 {
 	std::ifstream	file(path.c_str(), std::fstream::binary);
 
@@ -42,13 +42,13 @@ Image	Image::load(const std::string &path)
 	if (width > 1024 || height > 1024)
 		throw (std::runtime_error("image is to large"));
 
-	Image	img = Image();
+	Image	*img = new Image();
 
-	img._width = width;
-	img._height = height;
+	img->_width = width;
+	img->_height = height;
 
-	img._data = new uint8_t[width * height];
-	file.read((char *)img._data, width * height);
+	img->_data = new uint8_t[(width * 3) * (height * 3)];
+	file.read((char *)img->_data, (width * 3) * (height * 3));
 	file.close();
 	return (img);
 }

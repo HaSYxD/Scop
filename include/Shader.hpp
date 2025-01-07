@@ -20,8 +20,6 @@ class	Shader
 		void	setMat4(const std::string &name, const struct mat4 &value);
 
 	private:
-		std::map<const std::string, int>	_uniformLocations;
-	
 		unsigned int	_id;
 		std::string	_vertexPath;
 		std::string	_fragmentPath;

@@ -1,3 +1,5 @@
+# include <glad/glad.h>
+# include <GLFW/glfw3.h>
 # include <utils.hpp>
 # include <Material.hpp>
 # include <Image.hpp>
@@ -11,14 +13,13 @@ Material::Material(const std::string &name) : _name(name)
 	this->_diffColor = vec3{1, 1, 1};
 	this->_specColor = vec3{1, 1, 1};
 	this->_specExponent = 0;
+	this->_texture = 0;
 }
 
 Material::~Material() {}
 
 MaterialGroup	* Material::loadMtlFile(const std::string &path)
 {
-	std::cout << path << std::endl;
-
 	std::ifstream	file(path);
 
 	if (!file.is_open())
@@ -55,30 +56,29 @@ MaterialGroup	* Material::loadMtlFile(const std::string &path)
 			mtlg->_materials[currMat]._diffColor = readToVec3(spStr);
 		else if (spStr[0] == "Ks")
 			mtlg->_materials[currMat]._specColor = readToVec3(spStr);
-		else if (spStr[0] == "Ns")
+		else if (spStr[0] == "Ns") {
 			mtlg->_materials[currMat]._specExponent = atof(spStr[1].c_str());
+			std::cout << spStr[1] << std::endl;
+		}
 		else if (spStr[0] == "map_Ka" || spStr[0] == "map_Kd" || spStr[0] == "map_Ks"){
-			Image	img = Image::load(trim(path, '/') + spStr[1]);
+			if (mtlg->_materials[currMat]._texture) continue ;
+
+			std::string	texPath(trim(path, '/') + "/" + spStr[1]);
+			std::cout << texPath << std::endl;
+			Image	* img = Image::load(texPath);
+
+			glCreateTextures(GL_TEXTURE_2D, 1, &mtlg->_materials[currMat]._texture);
+			glBindTexture(GL_TEXTURE_2D, mtlg->_materials[currMat]._texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->getWidth(), img->getHeight(),
+					0, GL_RGB, GL_UNSIGNED_BYTE, img->getData());
+			delete img;
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			//-glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
-
-	for (Material &mat : mtlg->_materials) {
-		std::cout << mat._name << std::endl;
-		std::cout << mat._ambColor.entries[0] << " | "
-			<< mat._ambColor.entries[1] << " | "
-			<< mat._ambColor.entries[2] << std::endl;
-
-		std::cout << mat._diffColor.entries[0] << " | "
-			<< mat._diffColor.entries[1] << " | "
-			<< mat._diffColor.entries[2] << std::endl;
-
-		std::cout << mat._specColor.entries[0] << " | "
-			<< mat._specColor.entries[1] << " | "
-			<< mat._specColor.entries[2] << std::endl;
-
-		std::cout << mat._specExponent << std::endl;
-	}
-
 	return (mtlg);
 }
 
@@ -87,7 +87,7 @@ std::string	& Material::getName()
 	return (this->_name);
 }
 
-uintptr_t	& Material:: getTexture()
+uint32_t	& Material:: getTexture()
 {
 	return (this->_texture);
 }

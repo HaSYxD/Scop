@@ -14,8 +14,8 @@ RenderEngine::RenderEngine() : _camera((vec3){0, 0, 0})
 	//Initialize GLFW for OpenGL
 	glfwInit();
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	//Create GLFW window
@@ -65,9 +65,13 @@ void	RenderEngine::run(const std::string &path)
 	vec3	a = vec3{0, 0, 0};
 	vec3	p = vec3{0, 0, 0};
 	int	hasBeenPressed = 0;
+	unsigned int	renderMode = 0;
+
+	vec3	ratio = vec3{1.0f, 0.0f, 0.0f};
 
 	mat4	projection = projectionMatrix(90.0f, (float)WIN_WIDTH / (float)WIN_HEIGHT, 0.1f, 1000.0f);
 	this->_shaders[0]->setMat4("projection", projection);
+	this->_camera.setTarget(obj->getCenter());
 
 	//Main loop of the Program
 	while (!glfwWindowShouldClose(this->_window)) {	
@@ -123,13 +127,42 @@ void	RenderEngine::run(const std::string &path)
 		else if (glfwGetKey(this->_window, GLFW_KEY_D) == GLFW_PRESS)
 			a.entries[2] -= 0.01;
 		
-		if (glfwGetKey(this->_window, GLFW_KEY_UP) == GLFW_PRESS)
-			scale += 0.01;
-		else if (glfwGetKey(this->_window, GLFW_KEY_DOWN) == GLFW_PRESS)
-			scale -= 0.01;
+		if (glfwGetKey(this->_window, GLFW_KEY_UP) == GLFW_PRESS && !hasBeenPressed) {
+			renderMode += 1;
+			hasBeenPressed = 1;
+		}
+		else if (glfwGetKey(this->_window, GLFW_KEY_UP) == GLFW_RELEASE && hasBeenPressed)
+			hasBeenPressed = 0;
 
-		if (scale < MIN_SCALE) scale = MIN_SCALE;
+		if (renderMode > 2) renderMode = 0;
 
+		if (renderMode == 0) {
+			ratio.entries[0] += 0.01;
+			ratio.entries[1] -= 0.01;
+			ratio.entries[2] -= 0.01;
+		}
+		else if (renderMode == 1) {
+			ratio.entries[0] -= 0.01;
+			ratio.entries[1] += 0.01;
+			ratio.entries[2] -= 0.01;
+		}
+		if (renderMode == 2) {
+			ratio.entries[0] -= 0.01;
+			ratio.entries[1] -= 0.01;
+			ratio.entries[2] += 0.01;
+		}
+
+		if (ratio.entries[0] > 1.0f) ratio.entries[0] = 1.0f;
+		else if (ratio.entries[0] < 0.0f) ratio.entries[0] = 0.0f;
+		
+		if (ratio.entries[1] > 1.0f) ratio.entries[1] = 1.0f;
+		else if (ratio.entries[1] < 0.0f) ratio.entries[1] = 0.0f;
+		
+		if (ratio.entries[2] > 1.0f) ratio.entries[2] = 1.0f;
+		else if (ratio.entries[2] < 0.0f) ratio.entries[2] = 0.0f;
+
+		this->_shaders[0]->setVec3("ratio", ratio);
+		
 		mat4	view = viewMatrix(
 				this->_camera.getPostion(),
 				this->_camera.getTarget());
@@ -146,13 +179,6 @@ void	RenderEngine::run(const std::string &path)
 			glfwDestroyWindow(this->_window);
 			break ;
 		}
-		if (glfwGetKey(this->_window, GLFW_KEY_ENTER) == GLFW_PRESS && !hasBeenPressed) {
-			std::cout << "recompiling.." << std::endl;
-			this->_shaders[0]->recompile();
-			hasBeenPressed = 1;
-		}
-		else if (glfwGetKey(this->_window, GLFW_KEY_ENTER) == GLFW_RELEASE && hasBeenPressed)
-			hasBeenPressed = 0;
 
 		glfwSwapBuffers(this->_window);
 		time += 0.01;
